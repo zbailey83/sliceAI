@@ -1,0 +1,7 @@
+{
+  "name": "BeatSlicer AI",
+  "description": "An intelligent audio editor that uses Gemini 2.5 Flash to automatically chop samples and identify beats within MP3 files.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
