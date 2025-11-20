@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Header from './components/Header';
 import ControlPanel from './components/ControlPanel';
 import WaveformEditor from './components/WaveformEditor';
@@ -15,6 +15,20 @@ const App: React.FC = () => {
   const [isWaveformReady, setWaveformReady] = useState(false);
   const [status, setStatus] = useState<ProcessingStatus>({ isProcessing: false, message: '' });
   const [metaData, setMetaData] = useState<{ bpm?: number; genre?: string }>({});
+  
+  // Theme State
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  // Apply Theme Class
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode(prev => !prev);
 
   // Handle File Upload
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,8 +89,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen technical-grid flex flex-col font-sans text-zinc-50 selection:bg-blue-500/30">
-      <Header />
+    <div className="min-h-screen technical-grid flex flex-col font-sans text-zinc-900 dark:text-zinc-50 selection:bg-blue-500/30 transition-colors duration-300">
+      <Header isDarkMode={isDarkMode} toggleTheme={toggleTheme} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col gap-8 relative">
         
@@ -85,13 +99,13 @@ const App: React.FC = () => {
            <div className="flex flex-col items-center justify-center py-32 space-y-6 animate-in slide-in-from-bottom-5 duration-700">
               <div className="relative">
                 <div className="absolute -inset-4 bg-blue-500/20 blur-3xl rounded-full opacity-50"></div>
-                <h2 className="relative text-5xl md:text-7xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-500">
-                  BEAT<span className="text-blue-500">SLICER</span>
+                <h2 className="relative text-5xl md:text-7xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-zinc-900 to-zinc-500 dark:from-white dark:to-zinc-500">
+                  REDACT⚔️<span className="text-blue-600 dark:text-blue-500">SLICE AI</span>
                 </h2>
               </div>
-              <p className="text-lg text-zinc-400 max-w-xl text-center font-light leading-relaxed">
-                Upload audio. Deconstruct rhythm. <br/>
-                <span className="font-mono text-sm text-blue-400">AI-Powered Sample Architecture.</span>
+              <p className="text-lg text-zinc-600 dark:text-zinc-400 max-w-xl text-center font-light leading-relaxed">
+                Upload // Slice // Get REDACTED.<br/>
+                <span className="font-mono text-sm text-blue-600 dark:text-blue-400">AI-Powered Sample Architecture.</span>
               </p>
            </div>
         )}
@@ -107,6 +121,7 @@ const App: React.FC = () => {
                 setStatus({ isProcessing: false, message: '' });
               }}
               onPlayPause={setIsPlaying}
+              isDarkMode={isDarkMode}
            />
         </div>
 

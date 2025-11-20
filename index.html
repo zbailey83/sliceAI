@@ -1,28 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BeatSlicer AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace'],
+            },
+            colors: {
+              zinc: {
+                950: '#09090b',
+              }
+            }
+          }
+        }
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+      :root {
+        --bg-color: #f4f4f5; /* zinc-100 */
+        --grid-dot: #e4e4e7; /* zinc-200 */
+        --text-color: #18181b; /* zinc-900 */
+      }
+
+      .dark {
+        --bg-color: #09090b; /* zinc-950 */
+        --grid-dot: #27272a; /* zinc-800 */
+        --text-color: #fafafa; /* zinc-50 */
+      }
+
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #09090b; /* zinc-950 */
-        color: #fafafa; /* zinc-50 */
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
+      
       .font-mono {
         font-family: 'JetBrains Mono', monospace;
       }
       
       /* Technical Grid Background */
       .technical-grid {
-        background-color: #09090b;
-        background-image: radial-gradient(circle, #27272a 1px, transparent 1px);
+        background-color: var(--bg-color);
+        background-image: radial-gradient(circle, var(--grid-dot) 1px, transparent 1px);
         background-size: 40px 40px;
+        transition: background-color 0.3s ease, background-image 0.3s ease;
       }
 
       /* Custom scrollbar */
@@ -31,13 +64,19 @@
         height: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #09090b; 
+        background: transparent; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #27272a; 
+        background: #d4d4d8; 
         border-radius: 3px;
       }
+      .dark ::-webkit-scrollbar-thumb {
+        background: #27272a; 
+      }
       ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1aa; 
+      }
+      .dark ::-webkit-scrollbar-thumb:hover {
         background: #3f3f46; 
       }
     </style>

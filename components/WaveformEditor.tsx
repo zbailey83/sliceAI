@@ -9,6 +9,7 @@ interface WaveformEditorProps {
   onSlicesChange: (slices: number[]) => void;
   onReady: () => void;
   onPlayPause: (isPlaying: boolean) => void;
+  isDarkMode: boolean;
 }
 
 const WaveformEditor: React.FC<WaveformEditorProps> = ({
@@ -17,6 +18,7 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
   onSlicesChange,
   onReady,
   onPlayPause,
+  isDarkMode,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -25,6 +27,13 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
+  // Define colors based on theme
+  const getThemeColors = (dark: boolean) => ({
+    waveColor: dark ? '#52525b' : '#d4d4d8', // zinc-600 : zinc-300
+    progressColor: '#3b82f6', // blue-500
+    cursorColor: dark ? '#ffffff' : '#18181b', // white : zinc-900
+  });
+
   // Initialize WaveSurfer
   useEffect(() => {
     if (!containerRef.current) return;
@@ -32,11 +41,13 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
     const regions = RegionsPlugin.create();
     regionsRef.current = regions;
 
+    const colors = getThemeColors(isDarkMode);
+
     const ws = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: '#52525b', // zinc-600
-      progressColor: '#3b82f6', // blue-500
-      cursorColor: '#ffffff', // white
+      waveColor: colors.waveColor,
+      progressColor: colors.progressColor,
+      cursorColor: colors.cursorColor,
       barWidth: 2,
       barGap: 1,
       barRadius: 2,
@@ -87,6 +98,17 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); 
+
+  // Update WaveSurfer options when theme changes
+  useEffect(() => {
+    if (wavesurferRef.current) {
+      const colors = getThemeColors(isDarkMode);
+      wavesurferRef.current.setOptions({
+        waveColor: colors.waveColor,
+        cursorColor: colors.cursorColor,
+      });
+    }
+  }, [isDarkMode]);
 
   // Listen for custom toggle event from App.tsx
   useEffect(() => {
@@ -171,7 +193,7 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
     
     if (trackDuration === 0 && slices.length > 0) return;
 
-    // Using theme colors for slices
+    // Using theme colors for slices (keep consistent)
     const colors = [
       'rgba(59, 130, 246, 0.2)',  // blue
       'rgba(161, 161, 170, 0.2)', // zinc
@@ -199,34 +221,34 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
   }, [slices, duration]);
 
   return (
-    <div className="w-full bg-zinc-900/30 border border-zinc-800 rounded-xl p-6 backdrop-blur-md relative group overflow-hidden">
+    <div className="w-full bg-white/50 dark:bg-zinc-900/30 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 backdrop-blur-md relative group overflow-hidden transition-colors duration-300">
        {/* Corner Brackets */}
-      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-zinc-600"></div>
-      <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-zinc-600"></div>
-      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-zinc-600"></div>
-      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-zinc-600"></div>
+      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-zinc-300 dark:border-zinc-600"></div>
+      <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-zinc-300 dark:border-zinc-600"></div>
+      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-zinc-300 dark:border-zinc-600"></div>
+      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-zinc-300 dark:border-zinc-600"></div>
 
       {/* Header Info */}
       <div className="flex justify-between items-center mb-6 px-2">
         <div className="flex items-center gap-2">
-             <div className={`w-1.5 h-1.5 rounded-sm ${duration > 0 ? 'bg-blue-500 shadow-[0_0_8px_#3b82f6]' : 'bg-zinc-700'}`}></div>
-             <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.2em]">Waveform Visualization</span>
+             <div className={`w-1.5 h-1.5 rounded-sm ${duration > 0 ? 'bg-blue-500 shadow-[0_0_8px_#3b82f6]' : 'bg-zinc-400 dark:bg-zinc-700'}`}></div>
+             <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.2em]">Waveform Visualization</span>
         </div>
-        <div className="font-mono text-sm font-medium text-blue-400 tabular-nums tracking-tight">
-           {formatTime(currentTime)} <span className="text-zinc-700 mx-1">/</span> {formatTime(duration)}
+        <div className="font-mono text-sm font-medium text-blue-600 dark:text-blue-400 tabular-nums tracking-tight">
+           {formatTime(currentTime)} <span className="text-zinc-400 dark:text-zinc-700 mx-1">/</span> {formatTime(duration)}
         </div>
       </div>
       
       {/* Waveform Container */}
       <div 
         ref={containerRef} 
-        className="w-full relative rounded border border-zinc-800/50 bg-zinc-950/50"
+        className="w-full relative rounded border border-zinc-200 dark:border-zinc-800/50 bg-white dark:bg-zinc-950/50 transition-colors duration-300"
       />
 
       {/* Zoom Control */}
       <div className="mt-6 flex items-center gap-4 px-2">
         <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Time Scale</span>
-        <div className="flex-1 h-px bg-zinc-800 relative">
+        <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800 relative">
              <div className="absolute top-1/2 -translate-y-1/2 w-full flex items-center">
                 <input
                 type="range"
@@ -237,7 +259,7 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
                 className="w-full h-3 opacity-0 cursor-pointer absolute z-10" 
                 />
                 {/* Custom Track */}
-                <div className="w-full h-0.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="w-full h-0.5 bg-zinc-200 dark:bg-zinc-800 rounded-full overflow-hidden">
                    <div 
                     className="h-full bg-blue-500" 
                     style={{ width: `${((zoom - 10) / 290) * 100}%` }}
