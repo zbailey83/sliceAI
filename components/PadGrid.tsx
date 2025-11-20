@@ -8,12 +8,27 @@ interface PadGridProps {
 
 const KEY_MAP = ['1', '2', '3', '4', 'q', 'w', 'e', 'r', 'a', 's', 'd', 'f', 'z', 'x', 'c', 'v'];
 
-// Matching the colors used in WaveformEditor but fully opaque for pads
-const COLORS = [
-  'rgb(244, 114, 182)', // pink-400
-  'rgb(167, 139, 250)', // purple-400
-  'rgb(34, 211, 238)',  // cyan-400
-  'rgb(52, 211, 153)',  // emerald-400
+// Light, distinct pastel colors for the pads
+const PAD_COLORS = [
+  'bg-red-300 hover:bg-red-200', 
+  'bg-orange-300 hover:bg-orange-200', 
+  'bg-amber-300 hover:bg-amber-200', 
+  'bg-yellow-300 hover:bg-yellow-200',
+  
+  'bg-lime-300 hover:bg-lime-200', 
+  'bg-green-300 hover:bg-green-200', 
+  'bg-emerald-300 hover:bg-emerald-200', 
+  'bg-teal-300 hover:bg-teal-200',
+  
+  'bg-cyan-300 hover:bg-cyan-200', 
+  'bg-sky-300 hover:bg-sky-200', 
+  'bg-blue-300 hover:bg-blue-200', 
+  'bg-indigo-300 hover:bg-indigo-200',
+  
+  'bg-violet-300 hover:bg-violet-200', 
+  'bg-purple-300 hover:bg-purple-200', 
+  'bg-fuchsia-300 hover:bg-fuchsia-200', 
+  'bg-pink-300 hover:bg-pink-200',
 ];
 
 const PadGrid: React.FC<PadGridProps> = ({ slices, hasAudio, isWaveformReady }) => {
@@ -34,8 +49,6 @@ const PadGrid: React.FC<PadGridProps> = ({ slices, hasAudio, isWaveformReady }) 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
-      
-      // Don't trigger if user is typing in an input (though we don't have many inputs)
       if ((e.target as HTMLElement).tagName === 'INPUT') return;
 
       const keyIndex = KEY_MAP.indexOf(e.key.toLowerCase());
@@ -52,19 +65,18 @@ const PadGrid: React.FC<PadGridProps> = ({ slices, hasAudio, isWaveformReady }) 
   const pads = Array.from({ length: 16 }, (_, i) => i);
 
   return (
-    <div className="w-full max-w-3xl mx-auto mt-8">
-      <div className="flex items-center justify-between mb-4 px-2">
-        <h3 className="text-slate-400 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-          <span className="w-2 h-2 bg-cyan-500 rounded-full"></span>
+    <div className="w-full max-w-2xl mx-auto mt-8">
+      <div className="flex items-center justify-between mb-4 px-1">
+        <h3 className="text-zinc-400 text-xs font-mono uppercase tracking-widest flex items-center gap-2">
           Performance Pads
         </h3>
-        <span className="text-xs text-slate-600 font-mono">Keyboard: 1-4, Q-R, A-F, Z-V</span>
+        <span className="text-[10px] text-zinc-600 font-mono">KEYBOARD MAPPED</span>
       </div>
       
-      <div className="grid grid-cols-4 gap-3 md:gap-4 p-4 bg-slate-900/50 border border-slate-800 rounded-2xl backdrop-blur-sm">
+      <div className="grid grid-cols-4 gap-3 p-4 bg-zinc-900/50 rounded-xl border border-zinc-800 shadow-2xl">
         {pads.map((index) => {
           const hasSlice = index < slices.length;
-          const color = COLORS[index % COLORS.length];
+          const colorClass = PAD_COLORS[index % PAD_COLORS.length];
           const isActive = activePad === index;
           const keyLabel = KEY_MAP[index].toUpperCase();
 
@@ -74,41 +86,29 @@ const PadGrid: React.FC<PadGridProps> = ({ slices, hasAudio, isWaveformReady }) 
               onClick={() => triggerPad(index)}
               disabled={!hasSlice || !isWaveformReady}
               className={`
-                aspect-square rounded-xl relative overflow-hidden transition-all duration-100 group
+                aspect-square relative rounded-lg transition-all duration-100
+                flex flex-col items-center justify-center
                 ${!hasSlice 
-                  ? 'bg-slate-800/50 border border-slate-800 opacity-50 cursor-not-allowed' 
-                  : 'bg-slate-800 border border-slate-700 hover:border-slate-500 hover:bg-slate-750 cursor-pointer shadow-lg active:scale-95'
+                  ? 'bg-zinc-800/50 opacity-50 cursor-not-allowed border border-zinc-700/50' 
+                  : `${colorClass} shadow-lg cursor-pointer border-b-4 border-black/10 active:border-b-0 active:translate-y-1`
                 }
-                ${isActive ? 'scale-95 brightness-125 ring-2 ring-offset-2 ring-offset-slate-900 ring-cyan-400' : ''}
+                ${isActive ? 'brightness-110 scale-95' : 'hover:-translate-y-0.5'}
               `}
-              style={hasSlice && isActive ? {
-                backgroundColor: color,
-                borderColor: color,
-                boxShadow: `0 0 20px ${color}`
-              } : {}}
             >
-              {/* Color Indicator Bar (Bottom) */}
-              {hasSlice && (
-                <div 
-                  className={`absolute bottom-0 left-0 w-full h-1.5 opacity-80 transition-opacity group-hover:opacity-100`}
-                  style={{ backgroundColor: color }}
-                />
-              )}
-
-              {/* Pad LED (Top Right) */}
-              {hasSlice && (
-                <div className={`absolute top-2 right-2 w-1.5 h-1.5 rounded-full transition-all duration-75 ${isActive ? 'bg-white shadow-[0_0_8px_white]' : 'bg-slate-900/80'}`}></div>
-              )}
-
               {/* Label */}
-              <div className="absolute top-2 left-3 text-xs font-mono font-bold text-slate-500 group-hover:text-slate-300 transition-colors">
+              <div className={`text-lg font-bold transition-colors ${hasSlice ? 'text-zinc-900' : 'text-zinc-600'}`}>
                 {index + 1}
               </div>
 
               {/* Key binding hint */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-20 pointer-events-none">
-                <span className="text-4xl font-black text-white">{keyLabel}</span>
+              <div className={`text-[10px] font-mono mt-1 ${hasSlice ? 'text-zinc-800/70' : 'text-zinc-600'}`}>
+                {keyLabel}
               </div>
+              
+              {/* Light reflection effect */}
+              {hasSlice && (
+                 <div className="absolute top-2 left-2 right-2 h-1/3 bg-gradient-to-b from-white/30 to-transparent rounded-t-md pointer-events-none"></div>
+              )}
             </button>
           );
         })}

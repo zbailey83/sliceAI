@@ -30,7 +30,7 @@ const App: React.FC = () => {
       setSlices([]); // Reset slices for new file
       setMetaData({});
       
-      setStatus({ isProcessing: true, message: 'Loading audio...' });
+      setStatus({ isProcessing: true, message: 'Initializing audio stream...' });
     }
   }, []);
 
@@ -38,13 +38,13 @@ const App: React.FC = () => {
   const handleAutoChop = useCallback(async () => {
     if (!audioFile) return;
 
-    setStatus({ isProcessing: true, message: 'Extracting audio data...' });
+    setStatus({ isProcessing: true, message: 'Extracting audio signature...' });
 
     try {
       // 1. Convert File to Base64
       const base64Audio = await fileToBase64(audioFile);
       
-      setStatus({ isProcessing: true, message: 'Gemini is listening & analyzing...' });
+      setStatus({ isProcessing: true, message: 'Gemini analysis in progress...' });
       
       // 2. Call Gemini Service
       const result: SliceResponse = await analyzeAudioAndGetSlices(base64Audio, audioFile.type);
@@ -55,14 +55,14 @@ const App: React.FC = () => {
         const uniqueSlices = Array.from(new Set(result.slices)).sort((a, b) => a - b);
         setSlices(uniqueSlices);
         setMetaData({ bpm: result.bpm, genre: result.genre });
-        setStatus({ isProcessing: false, message: 'Complete!' });
+        setStatus({ isProcessing: false, message: 'Analysis complete' });
       } else {
         throw new Error("No slices identified.");
       }
 
     } catch (error) {
       console.error(error);
-      setStatus({ isProcessing: false, message: 'Error analyzing audio.' });
+      setStatus({ isProcessing: false, message: 'Analysis failed' });
       alert("Failed to analyze audio. Please try a shorter clip or different file.");
     }
   }, [audioFile]);
@@ -75,25 +75,29 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 flex flex-col font-sans selection:bg-cyan-500/30">
+    <div className="min-h-screen technical-grid flex flex-col font-sans text-zinc-50 selection:bg-blue-500/30">
       <Header />
 
-      <main className="flex-1 container mx-auto px-4 py-8 flex flex-col gap-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex flex-col gap-8 relative">
         
         {/* Hero / Instructions */}
         {!audioUrl && (
-           <div className="text-center py-20 space-y-4 animate-in slide-in-from-bottom-10 duration-700">
-              <h2 className="text-4xl md:text-6xl font-bold text-white tracking-tight">
-                Sample. Slice. <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">Create.</span>
-              </h2>
-              <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-                Upload an MP3. Let Gemini AI listen to the groove and automatically chop it into perfect loops and one-shots.
+           <div className="flex flex-col items-center justify-center py-32 space-y-6 animate-in slide-in-from-bottom-5 duration-700">
+              <div className="relative">
+                <div className="absolute -inset-4 bg-blue-500/20 blur-3xl rounded-full opacity-50"></div>
+                <h2 className="relative text-5xl md:text-7xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-zinc-500">
+                  BEAT<span className="text-blue-500">SLICER</span>
+                </h2>
+              </div>
+              <p className="text-lg text-zinc-400 max-w-xl text-center font-light leading-relaxed">
+                Upload audio. Deconstruct rhythm. <br/>
+                <span className="font-mono text-sm text-blue-400">AI-Powered Sample Architecture.</span>
               </p>
            </div>
         )}
 
         {/* Editor Area */}
-        <div className={`transition-all duration-500 ${audioUrl ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 hidden'}`}>
+        <div className={`transition-all duration-700 ease-out ${audioUrl ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 hidden'}`}>
            <WaveformEditor 
               audioUrl={audioUrl} 
               slices={slices}
@@ -122,7 +126,7 @@ const App: React.FC = () => {
 
         {/* Pads (Only show if audio is loaded) */}
         {audioUrl && (
-          <div className="animate-in slide-in-from-bottom-5 duration-500 delay-150">
+          <div className="animate-in slide-in-from-bottom-5 duration-500 delay-150 pb-20">
              <PadGrid 
                 slices={slices}
                 hasAudio={!!audioUrl}
@@ -132,13 +136,6 @@ const App: React.FC = () => {
         )}
       
       </main>
-
-      {/* Background Decor */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-900/10 blur-[120px]"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-cyan-900/10 blur-[120px]"></div>
-      </div>
-
     </div>
   );
 };

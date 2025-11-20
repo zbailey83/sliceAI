@@ -34,17 +34,19 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
-      waveColor: '#475569', // slate-600
-      progressColor: '#22d3ee', // cyan-400
-      cursorColor: '#f472b6', // pink-400
-      barWidth: 3,
-      barGap: 2,
-      barRadius: 3,
-      height: 250,
+      waveColor: '#52525b', // zinc-600
+      progressColor: '#3b82f6', // blue-500
+      cursorColor: '#ffffff', // white
+      barWidth: 2,
+      barGap: 1,
+      barRadius: 2,
+      height: 280,
       url: audioUrl || undefined,
       minPxPerSec: zoom,
       plugins: [regions],
-      normalize: true, // Normalize waveform for better visuals
+      normalize: true, 
+      interact: true,
+      hideScrollbar: false,
     });
 
     wavesurferRef.current = ws;
@@ -132,8 +134,6 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
   // Handle Audio URL Changes
   useEffect(() => {
     if (wavesurferRef.current && audioUrl) {
-      // Stop playback before loading new file to avoid race conditions
-      // Crucial: Check duration before calling pause to avoid "No audio loaded" error
       if (wavesurferRef.current.getDuration() > 0) {
         try {
             wavesurferRef.current.pause();
@@ -169,21 +169,18 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
     regionsRef.current.clearRegions();
     const trackDuration = wavesurferRef.current.getDuration();
     
-    // Need wait for duration if it's 0 (track loading)
     if (trackDuration === 0 && slices.length > 0) return;
 
+    // Using theme colors for slices
     const colors = [
-      'rgba(244, 114, 182, 0.3)', // pink
-      'rgba(167, 139, 250, 0.3)', // purple
-      'rgba(34, 211, 238, 0.3)',  // cyan
-      'rgba(52, 211, 153, 0.3)',  // emerald
+      'rgba(59, 130, 246, 0.2)',  // blue
+      'rgba(161, 161, 170, 0.2)', // zinc
+      'rgba(34, 197, 94, 0.2)',   // green
     ];
 
     slices.forEach((startTime, index) => {
-      // If next slice exists, end there. Else end a bit later or at track end.
       let endTime = slices[index + 1];
       if (!endTime) {
-         // Last slice logic
          endTime = trackDuration;
       }
 
@@ -195,53 +192,64 @@ const WaveformEditor: React.FC<WaveformEditorProps> = ({
         color: colors[index % colors.length],
         drag: false,
         resize: true,
-        content: `Sample ${index + 1}`,
+        content: `${index + 1}`,
       });
     });
 
-  }, [slices, duration]); // Re-run when duration is ready or slices change
+  }, [slices, duration]);
 
   return (
-    <div className="w-full bg-slate-900/80 border border-slate-800 rounded-xl p-6 backdrop-blur-md shadow-xl relative group">
-      
-      {/* Time Display Overlay */}
-      <div className="flex justify-between items-center mb-4 px-2">
+    <div className="w-full bg-zinc-900/30 border border-zinc-800 rounded-xl p-6 backdrop-blur-md relative group overflow-hidden">
+       {/* Corner Brackets */}
+      <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-zinc-600"></div>
+      <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-zinc-600"></div>
+      <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-zinc-600"></div>
+      <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-zinc-600"></div>
+
+      {/* Header Info */}
+      <div className="flex justify-between items-center mb-6 px-2">
         <div className="flex items-center gap-2">
-             <div className={`w-2 h-2 rounded-full ${duration > 0 ? 'bg-red-500 animate-pulse' : 'bg-slate-600'}`}></div>
-             <span className="text-xs font-mono text-slate-400 uppercase tracking-widest">Waveform View</span>
+             <div className={`w-1.5 h-1.5 rounded-sm ${duration > 0 ? 'bg-blue-500 shadow-[0_0_8px_#3b82f6]' : 'bg-zinc-700'}`}></div>
+             <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-[0.2em]">Waveform Visualization</span>
         </div>
-        <div className="font-mono text-lg font-bold text-cyan-400 tabular-nums tracking-tighter">
-           {formatTime(currentTime)} <span className="text-slate-600">/</span> {formatTime(duration)}
+        <div className="font-mono text-sm font-medium text-blue-400 tabular-nums tracking-tight">
+           {formatTime(currentTime)} <span className="text-zinc-700 mx-1">/</span> {formatTime(duration)}
         </div>
       </div>
       
+      {/* Waveform Container */}
       <div 
         ref={containerRef} 
-        className="w-full relative rounded-lg overflow-hidden cursor-pointer"
+        className="w-full relative rounded border border-zinc-800/50 bg-zinc-950/50"
       />
 
       {/* Zoom Control */}
       <div className="mt-6 flex items-center gap-4 px-2">
-        <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Scale</span>
-        <div className="flex-1 h-1 bg-slate-800 rounded-full overflow-hidden">
-            <input
-            type="range"
-            min="10"
-            max="300"
-            value={zoom}
-            onChange={(e) => setZoom(Number(e.target.value))}
-            className="w-full h-full opacity-0 cursor-pointer absolute inset-0 z-10" 
-            />
-            <div className="h-full bg-slate-600 relative" style={{ width: '100%' }}></div>
+        <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">Time Scale</span>
+        <div className="flex-1 h-px bg-zinc-800 relative">
+             <div className="absolute top-1/2 -translate-y-1/2 w-full flex items-center">
+                <input
+                type="range"
+                min="10"
+                max="300"
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                className="w-full h-3 opacity-0 cursor-pointer absolute z-10" 
+                />
+                {/* Custom Track */}
+                <div className="w-full h-0.5 bg-zinc-800 rounded-full overflow-hidden">
+                   <div 
+                    className="h-full bg-blue-500" 
+                    style={{ width: `${((zoom - 10) / 290) * 100}%` }}
+                   ></div>
+                </div>
+                {/* Custom Thumb */}
+                <div 
+                    className="absolute w-2 h-2 bg-blue-500 rounded-full shadow-lg pointer-events-none"
+                    style={{ left: `${((zoom - 10) / 290) * 100}%`, transform: 'translateX(-50%)' }}
+                ></div>
+             </div>
         </div>
-        <input
-          type="range"
-          min="10"
-          max="300"
-          value={zoom}
-          onChange={(e) => setZoom(Number(e.target.value))}
-          className="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 hover:accent-cyan-400"
-        />
       </div>
     </div>
   );

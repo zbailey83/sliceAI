@@ -1,5 +1,5 @@
 import React from 'react';
-import { Play, Pause, Trash2, Wand2, Upload } from 'lucide-react';
+import { Play, Pause, Trash2, Wand2, Upload, Disc, Mic2 } from 'lucide-react';
 import { ProcessingStatus } from '../types';
 
 interface ControlPanelProps {
@@ -28,11 +28,18 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   genre
 }) => {
   return (
-    <div className="w-full max-w-5xl mx-auto mt-8 p-6 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+    <div className="w-full bg-zinc-900/30 border border-dashed border-zinc-700 rounded-xl backdrop-blur-sm p-6 relative group">
+      
+      {/* Decorative Corners */}
+      <div className="absolute -top-px -left-px w-4 h-4 border-t border-l border-zinc-500 opacity-50"></div>
+      <div className="absolute -top-px -right-px w-4 h-4 border-t border-r border-zinc-500 opacity-50"></div>
+      <div className="absolute -bottom-px -left-px w-4 h-4 border-b border-l border-zinc-500 opacity-50"></div>
+      <div className="absolute -bottom-px -right-px w-4 h-4 border-b border-r border-zinc-500 opacity-50"></div>
+
+      <div className="flex flex-col md:flex-row justify-between items-center gap-8">
         
-        {/* Left: Playback Controls */}
-        <div className="flex items-center gap-4">
+        {/* Left: Transport & Info */}
+        <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-start">
           <button
             onClick={() => {
               if (hasAudio && isWaveformReady) {
@@ -40,38 +47,40 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               }
             }}
             disabled={!hasAudio || !isWaveformReady}
-            className={`w-14 h-14 flex items-center justify-center rounded-full transition-all duration-200 ${
+            className={`w-12 h-12 flex items-center justify-center rounded border transition-all duration-200 ${
               !hasAudio || !isWaveformReady
-                ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
+                ? 'bg-zinc-900 border-zinc-800 text-zinc-700 cursor-not-allowed'
                 : isPlaying 
-                  ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.3)]' 
-                  : 'bg-slate-700 hover:bg-slate-600 text-white border border-slate-600'
+                  ? 'bg-blue-500/10 border-blue-500 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]' 
+                  : 'bg-zinc-800 hover:bg-zinc-700 border-zinc-600 text-zinc-100'
             }`}
           >
-            {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
+            {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
           </button>
           
-          <div className="flex flex-col">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Track Info</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-slate-200 font-mono text-sm">
-                {bpm ? `${Math.round(bpm)} BPM` : '-- BPM'}
-              </span>
-              <span className="text-slate-400 text-xs">•</span>
-              <span className="text-slate-400 font-mono text-xs uppercase">
-                {genre || 'Unknown Genre'}
-              </span>
+          <div className="space-y-1">
+            <div className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Analysis Data</div>
+            <div className="flex items-center gap-4 font-mono text-sm">
+              <div className="flex items-center gap-2 text-zinc-300">
+                <Disc className="w-3.5 h-3.5 text-zinc-500" />
+                {bpm ? `${Math.round(bpm)} BPM` : '---'}
+              </div>
+              <div className="w-px h-4 bg-zinc-800"></div>
+              <div className="flex items-center gap-2 text-zinc-300 uppercase">
+                <Mic2 className="w-3.5 h-3.5 text-zinc-500" />
+                {genre || '---'}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Center: Status / Upload */}
-        <div className="flex-1 flex justify-center">
+        {/* Center: Status / Primary Upload */}
+        <div className="flex-1 flex justify-center w-full md:w-auto">
             {!hasAudio ? (
-                <label className="cursor-pointer group relative">
-                    <div className="flex items-center gap-3 px-8 py-3 bg-slate-800 hover:bg-slate-750 border border-slate-700 border-dashed hover:border-cyan-500/50 rounded-xl transition-all duration-300">
-                        <Upload className="w-5 h-5 text-slate-400 group-hover:text-cyan-400 transition-colors" />
-                        <span className="text-sm font-medium text-slate-300 group-hover:text-white">Upload MP3 / WAV</span>
+                <label className="cursor-pointer group/upload relative w-full md:w-auto">
+                    <div className="flex items-center justify-center gap-3 px-8 py-3 bg-zinc-900/50 hover:bg-zinc-800 border border-zinc-700 border-dashed hover:border-blue-500/50 rounded transition-all duration-300">
+                        <Upload className="w-4 h-4 text-zinc-400 group-hover/upload:text-blue-400 transition-colors" />
+                        <span className="text-sm font-medium text-zinc-400 group-hover/upload:text-zinc-200">Select Audio Source</span>
                     </div>
                     <input 
                         type="file" 
@@ -81,18 +90,20 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                     />
                 </label>
             ) : (
-                <div className="flex flex-col items-center animate-in fade-in zoom-in duration-300">
+                <div className="flex flex-col items-center min-w-[200px]">
                      {status.isProcessing ? (
-                        <div className="flex items-center gap-3 px-6 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full">
-                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms'}}></div>
-                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms'}}></div>
-                            <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms'}}></div>
-                            <span className="text-xs font-medium text-indigo-300 ml-2">{status.message}</span>
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="flex gap-1">
+                              <div className="w-1 h-4 bg-blue-500 animate-[pulse_1s_ease-in-out_infinite]"></div>
+                              <div className="w-1 h-4 bg-blue-500 animate-[pulse_1s_ease-in-out_0.2s_infinite]"></div>
+                              <div className="w-1 h-4 bg-blue-500 animate-[pulse_1s_ease-in-out_0.4s_infinite]"></div>
+                            </div>
+                            <span className="text-[10px] font-mono text-blue-400 uppercase tracking-wider">{status.message}</span>
                         </div>
                      ) : (
-                        <div className="text-center">
-                            <p className="text-xs text-slate-500 mb-1">Gemini AI Ready</p>
-                            <div className="h-1 w-12 bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full mx-auto"></div>
+                        <div className="flex items-center gap-2 px-3 py-1 rounded border border-zinc-800 bg-zinc-900/50">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                            <span className="text-[10px] font-mono text-zinc-400 uppercase">Ready</span>
                         </div>
                      )}
                 </div>
@@ -100,11 +111,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          {/* New File Upload Button (Visible only when audio is loaded) */}
+        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+          {/* New File Upload Button */}
           {hasAudio && (
-            <label className="p-3 text-slate-400 hover:text-cyan-400 hover:bg-cyan-400/10 rounded-lg transition-colors cursor-pointer" title="Upload New File">
-                <Upload className="w-5 h-5" />
+            <label className="p-2.5 text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 border border-transparent hover:border-zinc-700 rounded transition-all cursor-pointer" title="New Upload">
+                <Upload className="w-4 h-4" />
                 <input 
                     type="file" 
                     accept="audio/*" 
@@ -117,31 +128,24 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <button
             onClick={onClearSlices}
             disabled={!hasAudio || status.isProcessing}
-            className="p-3 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors disabled:opacity-30"
+            className="p-2.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded transition-all disabled:opacity-30"
             title="Clear Slices"
           >
-            <Trash2 className="w-5 h-5" />
+            <Trash2 className="w-4 h-4" />
           </button>
 
           <button
             onClick={onAutoChop}
             disabled={!hasAudio || status.isProcessing || !isWaveformReady}
             className={`
-              relative group flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-200
+              relative flex items-center gap-2 px-6 py-2.5 rounded font-medium text-sm transition-all duration-200 border
               ${!hasAudio || status.isProcessing || !isWaveformReady
-                ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' 
-                : 'bg-gradient-to-br from-indigo-600 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white shadow-lg shadow-indigo-500/20 border border-indigo-400/20'}
+                ? 'bg-zinc-900 text-zinc-600 border-zinc-800 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500 hover:border-blue-400 shadow-lg shadow-blue-900/20'}
             `}
           >
             <Wand2 className={`w-4 h-4 ${status.isProcessing ? 'animate-spin' : ''}`} />
-            <span>{status.isProcessing ? 'Thinking...' : 'Auto Chop'}</span>
-            
-            {!status.isProcessing && hasAudio && isWaveformReady && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-purple-500"></span>
-                </span>
-            )}
+            <span>Auto Chop</span>
           </button>
         </div>
       </div>
