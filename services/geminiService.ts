@@ -23,11 +23,18 @@ export const analyzeAudioAndGetSlices = async (
             },
           },
           {
-            text: `Analyze this audio sample. I need to slice it into rhythmic loops or distinct one-shots.
-            Identify the 4 to 12 most significant transient attacks or musical phrase changes that would make good chop points.
+            text: `Analyze this audio sample for a sampler application. I need you to "chop" this sample into playable slices to map onto a 4x4 pad controller (16 pads).
+
+            Target: Identify exactly 16 slice start points (timestamps in seconds).
             
+            Instructions:
+            1.  Find the 16 most musically significant transient attacks (kicks, snares, sample starts) or phrase changes.
+            2.  Always include 0.0 as the absolute first slice.
+            3.  If the audio is short or simple, return fewer slices, but maximize the usage of the 16 pads if the content allows (e.g., slice every beat or 1/8th note).
+            4.  Ensure slices are distinct (avoid slices that are extremely close together, e.g., < 0.05s).
+
             Return a JSON object with:
-            1. 'slices': an array of timestamps (in seconds) where a new slice should start. Always include 0.0 as the first slice.
+            1. 'slices': an array of numbers representing the start time in seconds for each slice.
             2. 'bpm': an estimated tempo (number) if detectable.
             3. 'genre': a short string describing the style.
             

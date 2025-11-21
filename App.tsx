@@ -65,8 +65,21 @@ const App: React.FC = () => {
       
       // 3. Apply Results
       if (result.slices && result.slices.length > 0) {
-        // Ensure unique and sorted slices
-        const uniqueSlices = Array.from(new Set(result.slices)).sort((a, b) => a - b);
+        // Filter out duplicates and sort
+        let uniqueSlices = Array.from(new Set(result.slices)).sort((a, b) => a - b);
+        
+        // Defensive: Ensure the first slice is exactly 0.0
+        if (Math.abs(uniqueSlices[0] - 0) > 0.001) {
+            uniqueSlices.unshift(0);
+        } else {
+            uniqueSlices[0] = 0;
+        }
+
+        // Limit to 16 slices for the pads
+        if (uniqueSlices.length > 16) {
+            uniqueSlices = uniqueSlices.slice(0, 16);
+        }
+
         setSlices(uniqueSlices);
         setMetaData({ bpm: result.bpm, genre: result.genre });
         setStatus({ isProcessing: false, message: 'Analysis complete' });
